@@ -1,4 +1,4 @@
-from flask import Flask,render_template
+from flask import Flask,render_template,request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -19,13 +19,30 @@ class todo(db.Model):
     def __repr__(self):
         return f"{self.sno},{self.title}"
 
-@app.route('/')
+@app.route('/', methods = ['GET','POST'])
 def home():
-    return render_template('index.html')
+    if request.method=='POST':
+        titl=request.form['title']
+        des = request.form['desc']
+        firstin = todo(title=titl,desc=des)
+        db.session.add(firstin)
+        db.session.commit()
 
-@app.route("/about")
+
+    alltodoes=todo.query.all()
+    return render_template('index.html',alltodoes=alltodoes)
+
+@app.route("/see")
 def about_page():
-    return "this is about page"
+    alltodoes=todo.query.all()
+
+
+
+
+
 
 # This MUST be at the very bottom, without an 'if' block for now
-app.run(debug=True, port=5001)
+with app.app_context():
+    db.create_all()
+if __name__ == "__main__":
+    app.run(debug=True, port=5001)
