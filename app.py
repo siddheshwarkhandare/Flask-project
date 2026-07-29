@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,redirect
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -32,9 +32,19 @@ def home():
     alltodoes=todo.query.all()
     return render_template('index.html',alltodoes=alltodoes)
 
+
+@app.route("/delete/<int:sno>")
+def delete(sno):
+    do=todo.query.filter_by(sno=sno).first()
+    db.session.delete(do)
+    db.session.commit()
+
+    return redirect('/')
+
 @app.route("/see")
-def about_page():
+def update():
     alltodoes=todo.query.all()
+
 
 
 
