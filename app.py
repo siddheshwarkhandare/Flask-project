@@ -41,9 +41,23 @@ def delete(sno):
 
     return redirect('/')
 
-@app.route("/see")
-def update():
-    alltodoes=todo.query.all()
+@app.route("/update/<int:sno>",methods = ['GET','POST'])
+def update(sno):
+    do=todo.query.filter_by(sno=sno).first()
+
+    if request.method=='POST':
+        do.title=request.form['title']
+        do.desc=request.form['desc']
+
+        db.session.commit() 
+        return redirect("/")       
+
+    return render_template('update.html',todo=do)
+
+@app.route("/cancel")
+def cancel():
+    return redirect('/update/')
+
 
 
 

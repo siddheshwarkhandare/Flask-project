@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="container my-5">
+
+    <h2 class="mb-4">Update Todo</h2>
+
+    <form action="/update/{{ todo.sno }}" method="POST">
+
+        <div class="mb-3">
+            <label for='title'class="form-label">Title</label>
+
+            <input
+                type="text"
+                class="form-control"
+                name="title"
+                value="{{todo.title}}"
+                required>
+        </div>
+
+        <div class="mb-3">
+            <label for='desc'class="form-label">Description</label>
+
+            <input
+                type="text"
+                class="form-control"
+                name="desc"
+                value="{{todo.desc}}"
+                required>
+        </div>
+
+        <button class="btn btn-outline-dark btn-sm mx-1">
+            Update Todo
+        </button>
+
+        <a href="/" class="btn btn-outline-dark btn-sm mx-1">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}
