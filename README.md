@@ -10,9 +10,12 @@ The application allows users to add, update, and delete tasks. All data is store
 ## Features
 
 * Add a new todo
+![alt text](<static/photo/Screenshot 2026-08-12 233127.png>)
 * Update an existing todo
+![alt text](<static/photo/Screenshot 2026-08-12 233405.png>)
 * Delete a todo
 * Store the date and time when a todo is created
+![alt text](<static/photo/Screenshot 2026-08-12 233423.png>)
 * Simple and responsive user interface
 
 ## Technologies Used
