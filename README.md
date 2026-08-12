@@ -1,7 +1,4 @@
-# learning-backend-
-
-
-the static folder is use for storing image and other data # Flask Todo App
+# Flask TODO app
 
 This is a simple Todo List web application built using Flask. I created this project while learning Flask and backend development to understand how CRUD (Create, Read, Update, Delete) operations work with a database.
 
