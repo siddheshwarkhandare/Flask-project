@@ -1,0 +1,36 @@
+
+  .notepad {
+    background: var(--paper);
+    border-radius: 4px;
+    padding: 28px 28px 28px 44px;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+    transform: rotate(0.3deg);
+    max-width: 480px;
+    margin: 20px auto 0;
+    background-image: repeating-linear-gradient(
+      to bottom, transparent 0, transparent 37px, var(--line) 38px
+    );
+  }
+  .notepad::before {
+    content: ""; position: absolute; left: 22px; top: 0; bottom: 0;
+    width: 2px; background: var(--danger); opacity: 0.4;
+  }
+  .notepad h2 { font-family: 'Caveat', cursive; font-size: 2.1rem; margin: 0 0 18px; }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-size: 0.8rem; text-transform: uppercase;
+    letter-spacing: 0.06em; opacity: 0.65; margin-bottom: 4px;
+  }
+  .field input {
+    width: 100%; border: none; border-bottom: 1px solid var(--line);
+    background: transparent; font-size: 1rem; padding: 6px 2px; color: var(--ink);
+  }
+  .field input:focus { outline: none; border-bottom: 2px solid var(--tape); }
+  .btn-row { display: flex; gap: 10px; margin-top: 10px; align-items: center; }
+  .btn-update {
+    font-weight: 600; border: none; background: var(--highlight);
+    color: var(--ink); padding: 10px 20px; border-radius: 3px; cursor: pointer;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+  }
+  .btn-cancel { font-weight: 500; text-decoration: none; color: var(--ink); opacity: 0.7; }
