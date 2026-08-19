@@ -1,25 +1,45 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}To-Do{% endblock %} · Notepad</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <title>
+      {% block title %}
+        To-Do
+      {% endblock %} · Notepad
+    </title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-  {% block extra_head %}{% endblock %}
-</head>
-<body>
-  <header class="desk-bar">
-    <span class="pin"></span>
-    <a href="/">To-Do List</a>
-  </header>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
 
-  <main>
-    {% block body %}{% endblock body %}
-  </main>
-</body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/base.css') }}"
+    />
+
+    {% block extra_head %}
+    {% endblock %}
+  </head>
+
+  <body>
+
+    <header class="desk-bar">
+      <span class="pin"></span>
+      <a href="/">To-Do List</a>
+    </header>
+
+    <main>
+      {% block body %}
+      {% endblock %}
+    </main>
+
+    {% block scripts %}
+    {% endblock %}
+
+  </body>
 </html>

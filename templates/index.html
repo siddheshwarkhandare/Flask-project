@@ -1,24 +1,31 @@
 {% extends 'base.html' %}
+
 {% block title %}Your To-Dos{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-
 {% endblock %}
 
 {% block body %}
 
+<!-- AI Voice Button -->
+<button id="mic-btn">🎤 Start Listening</button>
+<p id="result"></p>
+
 <section class="notepad">
   <h2>Add a Task</h2>
+
   <form action="/" method="POST">
     <div class="field">
       <label for="title">Title</label>
       <input type="text" id="title" name="title" required>
     </div>
+
     <div class="field">
       <label for="desc">Description</label>
       <input type="text" id="desc" name="desc" required>
     </div>
+
     <button type="submit" class="btn-add">Pin it</button>
   </form>
 </section>
@@ -27,28 +34,52 @@
 
 <div class="notes-grid">
   {% if alltodoes|length == 0 %}
-    <p class="empty-note">Nothing pinned yet — add your first task above.</p>
+
+    <p class="empty-note">
+      Nothing pinned yet — add your first task above.
+    </p>
+
   {% else %}
+
     {% for todo in alltodoes %}
+
     <div class="note {% if todo.completed %}completed{% endif %}">
       <span class="tape"></span>
+
       <div class="note-title">
-        <form action="/toggle/{{ todo.sno }}" method="POST" class="toggle-form">
-          <input type="checkbox" onchange="this.form.submit()" {% if todo.completed %}checked{% endif %}>
-        </form>
-        <span class="note-title-text">{{ todo.title }}</span>
+        <input type="checkbox"
+               onchange="this.form.submit()"
+               {% if todo.completed %}checked{% endif %}>
+
+        <span class="note-title-text">
+          {{ todo.title }}
+        </span>
       </div>
+
       <p class="note-desc">{{ todo.desc }}</p>
+
       <p class="note-date">
-        {% if todo.date_created %}{{ todo.date_created.strftime("%d %b, %I:%M %p") }}{% else %}N/A{% endif %}
+        {% if todo.date_created %}
+          {{ todo.date_created.strftime("%d %b, %I:%M %p") }}
+        {% else %}
+          N/A
+        {% endif %}
       </p>
+
       <div class="note-actions">
         <a href="/update/{{ todo.sno }}">Edit</a>
         <a href="/delete/{{ todo.sno }}" class="delete">Remove</a>
       </div>
     </div>
+
     {% endfor %}
+
   {% endif %}
 </div>
 
 {% endblock body %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+{% endblock %}

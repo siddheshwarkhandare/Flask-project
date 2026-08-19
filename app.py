@@ -65,6 +65,19 @@ def cancel():
     return redirect('/update/')
 
 
+@app.route("/voice", methods=["POST"])
+def voice():
+    data = request.get_json()
+
+    text = data.get("text")
+
+    print("Voice command:", text)
+
+    return {
+        "message": "Voice received",
+        "text": text
+    }
+
 
 
 
