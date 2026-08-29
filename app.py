@@ -1,6 +1,8 @@
-from flask import Flask,render_template,request,redirect
+from flask import Flask,flash,render_template,request,redirect,url_for
 from flask_login import LoginManager,UserMixin,login_user,logout_user,login_required, current_user
+from itsdangerous import URLSafeTimedSerializer
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone, timedelta
@@ -19,6 +21,9 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 
 app = Flask(__name__)
+app.config['SECRET_KEY']=os.getenv('SECRET_KEY')
+serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todo.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 login_manager= LoginManager(app)
@@ -26,12 +31,13 @@ login_manager.login_view='login'
 
 
 db = SQLAlchemy(app)
+migrate=Migrate(app,db)
 
-class User(db.Model):
+class User(UserMixin,db.Model):
     id = db.Column(db.Integer,primary_key=True)
     username=db.Column(db.String(100),unique=True, nullable=False)
     password=db.Column(db.String(150),nullable=False)
-
+    email = db.Column(db.String(150),unique=True,nullable=False)
 class todo(db.Model):
     sno = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False) 
@@ -48,30 +54,56 @@ class todo(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.route('/login',methods=['GET','POST'])
+def login():
+    if request.method == 'POST':
+        username=request.form['username']
+        password = request.form['password']
+        user=User.query.filter_by(username=username).first()
+
+        if user and user.password == password:
+            login_user(user)
+            return redirect('/')
+        else:
+            flash('invalide username')
+    return render_template('/user/login.html')
+
 @app.route('/register', methods=['GET','POST'])
 def register():
     if request.method=='POST':
         username=request.form['username']
+        email = request.form['email']
         password=request.form['password']
         user=User.query.filter_by(username=username).first()
         user=User(
             username=username,
+            email=email,
             password=password
         )
         db.session.add(user)
         db.session.commit()
         return redirect('/')
 
-    return render_template('/user/login.html')
+    return render_template('/user/register.html')
 
 @app.route('/forgot_password',methods=['GET','POST'])
 def forgot_password():
+    if request.method == 'POST':
+        username = request.form['username']
+        user = User.query.filter_by(username=username).first()
+
+        if user:
+            token = serializer.dumps(user.username, salt='password-reset')
+            reset_url = url_for('reset_password', token=token, _external=True)
+            # For now, just show the link (later replace with email sending)
+            flash(f'Reset link (demo only): {reset_url}')
+        else:
+            flash('No account found with that username')
+
+        return redirect(url_for('forgot_password'))
+
+    
     return render_template('/user/forgot_pass.html')
-
-
-@app.route('/login',methods=['GET','POST'])
-def login():
-    return redirect('user/reset_password.html')
 
 
 @app.route('/', methods = ['GET','POST'])
