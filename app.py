@@ -69,6 +69,11 @@ def forgot_password():
     return render_template('/user/forgot_pass.html')
 
 
+@app.route('/login',methods=['GET','POST'])
+def login():
+    return redirect('user/reset_password.html')
+
+
 @app.route('/', methods = ['GET','POST'])
 def home():
     if request.method=='POST':
