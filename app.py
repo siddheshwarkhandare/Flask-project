@@ -1,4 +1,5 @@
 from flask import Flask,render_template,request,redirect
+from flask_login import LoginManager,UserMixin,login_user,logout_user,login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -7,6 +8,7 @@ import os
 import json
 from dotenv import load_dotenv
 from google import genai 
+
 
 load_dotenv()
 client = genai.Client(
@@ -18,9 +20,17 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todo.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATION"] = False
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+login_manager= LoginManager(app)
+login_manager.login_view='login'
+
 
 db = SQLAlchemy(app)
+
+class User(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    username=db.Column(db.String(100),unique=True, nullable=False)
+    password=db.Column(db.String(150),nullable=False)
 
 class todo(db.Model):
     sno = db.Column(db.Integer, primary_key=True)
@@ -33,6 +43,31 @@ class todo(db.Model):
 
     def __repr__(self):
         return f"{self.sno},{self.title}"
+    
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route('/register', methods=['GET','POST'])
+def register():
+    if request.method=='POST':
+        username=request.form['username']
+        password=request.form['password']
+        user=User.query.filter_by(username=username).first()
+        user=User(
+            username=username,
+            password=password
+        )
+        db.session.add(user)
+        db.session.commit()
+        return redirect('/')
+
+    return render_template('/user/login.html')
+
+@app.route('/forgot_password',methods=['GET','POST'])
+def forgot_password():
+    return render_template('/user/forgot_pass.html')
+
 
 @app.route('/', methods = ['GET','POST'])
 def home():
