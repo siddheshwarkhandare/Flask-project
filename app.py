@@ -65,7 +65,7 @@ def login():
             login_user(user)
             return redirect('/')
         else:
-            flash('invalide username')
+            flash('invalide username/password')
     return render_template('/user/login.html')
 
 @app.route('/register', methods=['GET','POST'])
@@ -74,7 +74,12 @@ def register():
         username=request.form['username']
         email = request.form['email']
         password=request.form['password']
+        conpassword=request.form['confirm_password']
         user=User.query.filter_by(username=username).first()
+
+        if password!= conpassword:
+            flash("Password not  match")
+            return redirect(url_for('register'))
         user=User(
             username=username,
             email=email,
