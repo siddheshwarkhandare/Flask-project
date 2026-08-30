@@ -46,6 +46,7 @@ class todo(db.Model):
         db.DateTime,
         default=lambda: datetime.now(IST)
     )
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
         return f"{self.sno},{self.title}"
@@ -68,9 +69,10 @@ def login():
             flash('invalide username/password')
     return render_template('/user/login.html')
 @app.route('/logout')
+@login_required
 def logout():
-    logout_user
-    return redirect("/")
+    logout_user()  
+    return redirect(url_for('home'))
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -115,23 +117,27 @@ def forgot_password():
     return render_template('/user/forgot_pass.html')
 
 
-@app.route('/', methods = ['GET','POST'])
-@login_required
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method=='POST':
-
+    if request.method == 'POST':
         if not current_user.is_authenticated:
-            flash("you are not login ypu need to login")
-    
-        titl=request.form['title']
+            flash("You need to login to add a todo.")
+            return redirect(url_for('login'))
+
+        titl = request.form['title']
         des = request.form['desc']
-        firstin = todo(title=titl,desc=des)
+        firstin = todo(title=titl, desc=des, user_id=current_user.id)
         db.session.add(firstin)
         db.session.commit()
+        return redirect('/')
 
+    # show the logged-in user's todos, or nothing if not logged in
+    if current_user.is_authenticated:
+        alltodoes = todo.query.filter_by(user_id=current_user.id).all()
+    else:
+        alltodoes = []
 
-    alltodoes=todo.query.all()
-    return render_template('index.html',alltodoes=alltodoes)
+    return render_template('index.html', alltodoes=alltodoes)
 
 
 @app.route("/delete/<int:sno>")

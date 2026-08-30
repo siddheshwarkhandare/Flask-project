@@ -4,7 +4,7 @@
     padding: 28px 28px 28px 44px;
     position: relative;
     box-shadow: 0 10px 25px rgba(0,0,0,0.18);
-    transform: rotate(-0.4deg);
+    transform: rotate(0deg);
     margin-bottom: 48px;
     background-image: repeating-linear-gradient(
       to bottom, transparent 0, transparent 37px, var(--line) 38px
