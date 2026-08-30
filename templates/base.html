@@ -26,8 +26,11 @@
       <span class="pin"></span>
 
       <a href="/">To-Do List</a>
-
-      <a href="/logout" class="logout-btn"><button type="button" class="btn-add">Logout</button></a>
+      {% if current_user.is_authenticated %}
+        <a href="/logout" class="logout-btn"><button type="button" class="btn-add">Logout</button></a>
+      {% else %}
+        <a href="/logout" class="logout-btn"><button type="button" class="btn-add">Login</button></a>
+      {% endif %}
     </header>
 
     <main>
