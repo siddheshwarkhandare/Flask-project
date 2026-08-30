@@ -67,6 +67,10 @@ def login():
         else:
             flash('invalide username/password')
     return render_template('/user/login.html')
+@app.route('/logout')
+def logout():
+    logout_user
+    return redirect("/")
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -112,8 +116,13 @@ def forgot_password():
 
 
 @app.route('/', methods = ['GET','POST'])
+@login_required
 def home():
     if request.method=='POST':
+
+        if not current_user.is_authenticated:
+            flash("you are not login ypu need to login")
+    
         titl=request.form['title']
         des = request.form['desc']
         firstin = todo(title=titl,desc=des)
@@ -126,6 +135,7 @@ def home():
 
 
 @app.route("/delete/<int:sno>")
+@login_required
 def delete(sno):
     do=todo.query.filter_by(sno=sno).first()
     db.session.delete(do)
@@ -134,6 +144,7 @@ def delete(sno):
     return redirect('/')
 
 @app.route("/update/<int:sno>",methods = ['GET','POST'])
+
 def update(sno):
     do=todo.query.filter_by(sno=sno).first()
 
@@ -152,6 +163,7 @@ def cancel():
 
 
 @app.route("/voice", methods=["POST"])
+@login_required
 def voice():
 
     data = request.get_json()
@@ -254,6 +266,7 @@ For listing:
    
 
 @app.route("/test-ai")
+@login_required
 def test_ai():
     response = client.models.generate_content(
         model="gemini-3.6-flash",

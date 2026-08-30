@@ -7,39 +7,37 @@
     <title>
       {% block title %}
         To-Do
-      {% endblock %} · Notepad
+      {% endblock %}· Notepad
     </title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/base.css') }}"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
 
     {% block extra_head %}
+
     {% endblock %}
   </head>
 
   <body>
-
     <header class="desk-bar">
       <span class="pin"></span>
+
       <a href="/">To-Do List</a>
+
+      <a href="/logout" class="logout-btn"><button type="button" class="btn-add">Logout</button></a>
     </header>
 
     <main>
       {% block body %}
+
       {% endblock %}
     </main>
 
     {% block scripts %}
-    {% endblock %}
 
+    {% endblock %}
   </body>
 </html>

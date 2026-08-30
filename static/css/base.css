@@ -53,5 +53,11 @@
       outline: 2px solid var(--highlight);
       outline-offset: 2px;
     }
+.desk-bar {
+    display: flex;
+    align-items: center;
+}
 
-
+.logout-btn {
+    margin-left: auto;
+}
