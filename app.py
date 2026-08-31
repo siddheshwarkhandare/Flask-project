@@ -4,6 +4,8 @@ from itsdangerous import URLSafeTimedSerializer
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash,check_password_hash
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -22,6 +24,8 @@ client = genai.Client(
 IST = timezone(timedelta(hours=5, minutes=30))
 
 
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY']=os.getenv('SECRET_KEY')
 csrf = CSRFProtect(app)
@@ -31,6 +35,11 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todo.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 login_manager= LoginManager(app)
 login_manager.login_view='login'
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"]
+)
 
 
 db = SQLAlchemy(app)
@@ -65,6 +74,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 @app.route('/login',methods=['GET','POST'])
+@limiter.limit("5 per minute",methods=['POST'])
 def login():
     if request.method == 'POST':
         username=request.form['username']
@@ -84,6 +94,7 @@ def logout():
     return redirect(url_for('home'))
 
 @app.route('/register', methods=['GET','POST'])
+@limiter.limit("5 per minute",methods=['POST'])
 def register():
     if request.method=='POST':
         username=request.form['username']
@@ -168,7 +179,6 @@ def delete(sno):
     return redirect('/')
 
 @app.route("/update/<int:sno>",methods = ['GET','POST'])
-
 def update(sno):
     do=todo.query.filter_by(sno=sno).first()
 
@@ -298,6 +308,11 @@ def test_ai():
     )
 
     return response.text
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    flash("Too many login attempts. Please wait a minute and try again.")
+    return redirect(url_for('login'))
 
 
 
