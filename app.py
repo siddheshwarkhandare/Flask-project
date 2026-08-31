@@ -3,6 +3,7 @@ from flask_login import LoginManager,UserMixin,login_user,logout_user,login_requ
 from itsdangerous import URLSafeTimedSerializer
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_wtf import CSRFProtect
 from werkzeug.security import generate_password_hash,check_password_hash
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -23,6 +24,7 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 app = Flask(__name__)
 app.config['SECRET_KEY']=os.getenv('SECRET_KEY')
+csrf = CSRFProtect(app)
 serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todo.db"
