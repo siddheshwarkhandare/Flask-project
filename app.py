@@ -34,6 +34,13 @@ serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todo.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config['MAIL_SERVER']= 'smtp.gmail.com'
+app.config['MAIL_PORT']= 587
+app.config['MAIL_USERNAME']=os.getenv('mail')
+app.config['MAIL_PASSWORD'] = os.getenv('pass')
+app.config['MAIL_USE_TLS'] = True
+
+
 login_manager= LoginManager(app)
 login_manager.login_view='login'
 limiter = Limiter(
