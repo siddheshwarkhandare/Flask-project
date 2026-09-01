@@ -34,11 +34,14 @@ serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todo.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config['MAIL_SERVER']= 'smtp.gmail.com'
-app.config['MAIL_PORT']= 587
-app.config['MAIL_USERNAME']=os.getenv('mail')
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = os.getenv('mail')
 app.config['MAIL_PASSWORD'] = os.getenv('pass')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('mail')
 app.config['MAIL_USE_TLS'] = True
+mail = Mail(app)
+
 
 
 login_manager= LoginManager(app)
@@ -52,7 +55,6 @@ limiter = Limiter(
 
 db = SQLAlchemy(app)
 migrate=Migrate(app,db)
-mail=Mail(app)
 
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer,primary_key=True)
@@ -158,19 +160,29 @@ def forgot_password():
         user = User.query.filter_by(username=username,email=email).first()
 
         if user:
-            token = serializer.dumps(user.username, salt='password-reset')
+            token = serializer.dumps(user.email, salt='password-reset')
             reset_url = url_for('reset_password', token=token, _external=True)
-            # For now, just show the link (later replace with email sending)
-            flash(f'Reset link (demo only): {reset_password}')
+            print("DEBUG sender:", os.getenv('MAIL_USERNAME'))
+
+            msg = Message(
+                subject='Password Reset Request',
+                sender=os.getenv('MAIL_USERNAME'),
+                recipients=[user.email]
+            )
+            msg.body = f'Click the link below to reset your password:\n\n{reset_url}\n\nThis link expires in 1 hour.'
+            mail.send(msg)
+
+            flash('A password reset link has been sent to your email.')
         else:
-            flash('No account found with that username')
+            flash('No account found with that email')
 
         return redirect(url_for('forgot_password'))
+
 
     
     return render_template('/user/forgot_pass.html')
 
-@app.route('/reset_password',methods=['GET','POST'])
+@app.route('/reset_password/<token>',methods=['GET','POST'])
 def reset_password(token):
     try:
         email = serializer.loads(token, salt='password-reset', max_age=3600)  # 1 hour expiry
@@ -191,11 +203,12 @@ def reset_password(token):
             flash('Passwords do not match')
             return redirect(request.url)
 
-        user.password = new_password  # hash this if you add hashing later
+        user.hash_generate(new_password)   # hashes and stores it in hash_password
         db.session.commit()
         flash('Password updated! Please log in.')
         return redirect(url_for('login'))
-    return render_template('reset_password.html')
+
+    return render_template('/user/reset_password.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
