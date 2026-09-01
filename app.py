@@ -1,4 +1,4 @@
-from flask import Flask,flash,render_template,request,redirect,url_for
+from flask import Flask,flash,render_template,request,redirect,url_for,current_app
 from flask_login import LoginManager,UserMixin,login_user,logout_user,login_required, current_user
 from itsdangerous import URLSafeTimedSerializer
 from flask_sqlalchemy import SQLAlchemy
@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_mail import Mail,Message
 from werkzeug.security import generate_password_hash,check_password_hash
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -44,6 +45,7 @@ limiter = Limiter(
 
 db = SQLAlchemy(app)
 migrate=Migrate(app,db)
+mail=Mail(app)
 
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer,primary_key=True)
@@ -72,6 +74,21 @@ class todo(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+def get_serializer():
+    return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+
+def generate_reset_token(user_email):
+    s = get_serializer()
+    return s.dumps(user_email, salt='password-reset-salt')
+
+def verify_reset_token(token, expiration=3600):  # 1 hour expiry
+    s = get_serializer()
+    try:
+        email = s.loads(token, salt='password-reset-salt', max_age=expiration)
+    except Exception:
+        return None
+    return email
 
 @app.route('/login',methods=['GET','POST'])
 @limiter.limit("5 per minute",methods=['POST'])
@@ -130,13 +147,14 @@ def register():
 def forgot_password():
     if request.method == 'POST':
         username = request.form['username']
-        user = User.query.filter_by(username=username).first()
+        email=request.form['email']
+        user = User.query.filter_by(username=username,email=email).first()
 
         if user:
             token = serializer.dumps(user.username, salt='password-reset')
             reset_url = url_for('reset_password', token=token, _external=True)
             # For now, just show the link (later replace with email sending)
-            flash(f'Reset link (demo only): {reset_url}')
+            flash(f'Reset link (demo only): {reset_password}')
         else:
             flash('No account found with that username')
 
@@ -145,6 +163,32 @@ def forgot_password():
     
     return render_template('/user/forgot_pass.html')
 
+@app.route('/reset_password',methods=['GET','POST'])
+def reset_password(token):
+    try:
+        email = serializer.loads(token, salt='password-reset', max_age=3600)  # 1 hour expiry
+    except Exception:
+        flash('The reset link is invalid or has expired')
+        return redirect(url_for('forgot_password'))
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash('User not found')
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        new_password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        if new_password != confirm_password:
+            flash('Passwords do not match')
+            return redirect(request.url)
+
+        user.password = new_password  # hash this if you add hashing later
+        db.session.commit()
+        flash('Password updated! Please log in.')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -179,6 +223,7 @@ def delete(sno):
     return redirect('/')
 
 @app.route("/update/<int:sno>",methods = ['GET','POST'])
+@login_required
 def update(sno):
     do=todo.query.filter_by(sno=sno).first()
 
@@ -192,6 +237,7 @@ def update(sno):
     return render_template('update.html',todo=do)
 
 @app.route("/cancel")
+@login_required
 def cancel():
     return redirect('/update/')
 
