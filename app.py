@@ -134,13 +134,13 @@ def register():
 
         if User.query.filter_by(username=username).first():
             flash("Username already exist")
-            return redirect(url_for('/register'))
+            return redirect(url_for('register'))
         
         if  User.query.filter_by(email=email).first():
             flash("Email already exist")
-            return redirect(url_for('/register'))
+            return redirect(url_for('register'))
 
-        
+
         user=User(
             username=username,
             email=email,
@@ -206,7 +206,7 @@ def reset_password(token):
         user.hash_generate(new_password)   # hashes and stores it in hash_password
         db.session.commit()
         flash('Password updated! Please log in.')
-        return redirect(url_for('login'))
+        return redirect('/login')
 
     return render_template('/user/reset_password.html')
 

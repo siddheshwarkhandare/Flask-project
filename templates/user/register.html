@@ -1,24 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Register</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  </head>
-  <body class="bg-light">
-    <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
-      <div class="card p-4 shadow" style="width: 350px;">
-        <h3 class="text-center mb-3">Create Account</h3>
+{% extends '/user/login.html' %}
+    {% block title %}
+      Register
+    {% endblock  %}
 
-        {% with messages=get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-danger">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+    {% block top_heading %}
+     <h3 class="text-center mb-3">Register</h3>
+    {% endblock  %}
 
-        <form method="POST">
+
+{% block cintent %}
+
+  <form method="POST">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="mb-3">
             <label class="form-label">Username</label>
@@ -37,11 +29,8 @@
             <input type="password" name="confirm_password" class="form-control" required />
           </div>
           <button type="submit" class="btn btn-success w-100">Register</button>
-        </form>
-        <p class="text-center mt-3 mb-0">
+  </form>
+  <p class="text-center mt-3 mb-0">
           <a href="{{ url_for('login') }}">Already have an account? Login</a>
-        </p>
-      </div>
-    </div>
-  </body>
-</html>
+  </p>
+{% endblock  %}
